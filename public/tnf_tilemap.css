@@ -1,0 +1,24 @@
+.etm-vis {
+  padding: 1em;
+  display: flex;
+  -webkit-box-flex: 1;
+  flex: 1 1 100%;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+  flex-direction: row;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.leaflet-spin-control {
+  margin-right: 14px !important;
+}
+
+.leaflet-spin-control a {
+  color: #000;
+}
+
+.leaflet-draw-tooltip {
+  display: inline !important;
+}
