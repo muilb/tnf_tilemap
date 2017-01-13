@@ -22,3 +22,7 @@
 .leaflet-draw-tooltip {
   display: inline !important;
 }
+
+/*img.leaflet-tile {*/
+  /*filter: none;*/
+/*}*/

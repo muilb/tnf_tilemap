@@ -1,18 +1,16 @@
 <!-- vis type specific options -->
-<div ng-if="vis.params.mapType !== 'Windymap'" class="form-group">
-  <div class="form-group">
-    <label>
-      Metric View
-      <kbn-info info="Use this input to set view metric value. Make sure Apply changes for right value"></kbn-info>
-    </label>
-    <select name="metricIndex"
-            id="metricsOptions"
-            class="form-control"
-            ng-model="vis.params.metricIndex"
-            ng-options="metric.index as metric.name for metric in vis.type.params.metrics"
-    >
-    </select>
-  </div>
+<div class="form-group">
+  <label>
+    Metric View
+    <kbn-info info="Use this input to set view metric value. Make sure Apply changes for right value"></kbn-info>
+  </label>
+  <select name="metricIndex"
+          id="metricsOptions"
+          class="form-control"
+          ng-model="vis.params.metricIndex"
+          ng-options="metric.index as metric.name for metric in vis.type.params.metrics"
+  >
+  </select>
 </div>
 
 <div class="form-group">
@@ -37,7 +35,7 @@
          ng-model="vis.params.collarScale">
 </div>
 
-<div ng-if="vis.params.mapType !== 'Heatmap' && vis.params.mapType !== 'Windymap'" class="form-group">
+<div ng-if="vis.params.mapType !== 'Heatmap'" class="form-group">
   <div class="form-group">
     <label>Quantize scale type</label>
     <select name="scaleType"
@@ -153,47 +151,6 @@
   </div>
 </div>
 
-<div ng-if="vis.params.mapType === 'Windymap'" class="form-group">
-  <div class="form-group">
-    <label>
-      Temperature component
-      <kbn-info info="Use this input to set temp metric value. Make sure Apply changes for right value"></kbn-info>
-    </label>
-    <select name="tempIndex"
-            id="tempIndex"
-            class="form-control"
-            ng-model="vis.params.windIndex.tempIndex"
-            ng-options="metric.index as metric.name for metric in vis.type.params.metrics"
-    >
-    </select>
-  </div>
-  <div class="form-group">
-    <label>
-      Speed component
-      <kbn-info info="Use this input to set speed metric value. Make sure Apply changes for right value"></kbn-info>
-    </label>
-    <select name="speedIndex"
-            id="speedIndex"
-            class="form-control"
-            ng-model="vis.params.windIndex.speedIndex"
-            ng-options="metric.index as metric.name for metric in vis.type.params.metrics"
-    >
-    </select>
-  </div>
-  <div class="form-group">
-    <label>
-      Degree component
-      <kbn-info info="Use this input to set degree metric value. Make sure Apply changes for right value"></kbn-info>
-    </label>
-    <select name="degIndex"
-            id="degIndex"
-            class="form-control"
-            ng-model="vis.params.windIndex.degIndex"
-            ng-options="metric.index as metric.name for metric in vis.type.params.metrics"
-    >
-    </select>
-  </div>
-</div>
 <div class="vis-option-item form-group">
   <label>
     <input type="checkbox"

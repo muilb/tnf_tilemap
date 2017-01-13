@@ -1,4 +1,16 @@
 <div ng-controller="TNFTilemapController" class="etm-vis">
+  <div class="toolbar">
+    <button class="btn-default hamburger" ng-click="myFunction($event)"><i class="fa fa-bars"></i></button>
+    <div class="tourstops">
+      <select name="metricIndex"
+              class="form-control"
+              ng-model="vis.params.metricIndex"
+              ng-options="metric.index as metric.name for metric in vis.type.params.metrics"
+              ng-change="changeMetricsIndex(vis.params.metricIndex)"
+      >
+      </select>
+    </div>
+  </div>
   <div class="chart tilemap">
   </div>
 </div>

@@ -7,9 +7,9 @@
 import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
-import AggResponseGeoJsonGeoJsonProvider from 'plugins/tnf_tilemap/geo_json/geo_json';
-import AggResponseGribJsonProvider from 'plugins/tnf_tilemap/wind_grib/wind_grib';
+import AggResponseGeoJsonGeoJsonProvider from 'ui/agg_response/geo_json/geo_json';
 import MapProvider from 'plugins/tnf_tilemap/vislib/_map';
+
 define(function (require) {
   var module = require('ui/modules').get('kibana/tnf_tilemap', ['kibana']);
 
@@ -20,19 +20,14 @@ define(function (require) {
     const callbacks = Private(require('plugins/tnf_tilemap/callbacks'));
     const utils = require('plugins/tnf_tilemap/utils');
     let TileMapMap = Private(MapProvider);
-    //lbmui: test set const to var
     const geoJsonConverter = Private(AggResponseGeoJsonGeoJsonProvider);
-    const gribJsonConverter = Private(AggResponseGribJsonProvider);
     const Binder = require('ui/Binder');
     const ResizeChecker = Private(require('ui/vislib/lib/resize_checker'));
-
     let map = null;
     let collar = null;
     appendMap();
     modifyToDsl();
-    //lbmui: add jquery event for metrics change index
-    addSelectMetricEvent();
-    //end
+
     const binder = new Binder();
     const resizeChecker = new ResizeChecker($element);
     binder.on(resizeChecker, 'resize', function() {
@@ -89,15 +84,7 @@ define(function (require) {
       });
       var tables = tableGroup.tables;
       var firstChild = tables[0];
-
-      var result = geoJsonConverter($scope.vis, firstChild);
-      //lbmui
-      // check for mapType if windy map
-      if($scope.vis.params.mapType === 'Windymap') {
-        result.geoJson.gribs = gribJsonConverter($scope.vis, firstChild);
-      }
-
-      return result;
+      return geoJsonConverter($scope.vis, firstChild);
     }
 
     function getGeoExtents(visData) {
@@ -106,66 +93,6 @@ define(function (require) {
         max: visData.geoJson.properties.max
       }
     }
-
-    // lbmui: add function
-    function addSelectMetricEvent() {
-      $('#metricsOptions')
-        .one('focus', function (e) {
-          $(this).data('pre', e.target.selectedIndex);
-        })
-        .on('change', function (e) {
-          // metricsOption is on .visualization-options div scope
-          var $optionScope = angular.element(document.getElementsByClassName('visualization-options')[0]).scope();
-          var self = $(this);
-          var oldIndex = self.data('pre');
-          var newIndex = e.target.selectedIndex;
-          if($optionScope) {
-            setParamsToMetric($optionScope, oldIndex);
-            setMetricToParams($optionScope, newIndex);
-          }
-          // //lbmui: test set const to var for tooltip
-          // geoJsonConverter.tooltipFormatter = Private(require('plugins/tnf_tilemap/geo_json/tnf_tooltip_formatter'));
-
-          // set pre val
-          self.data('pre', newIndex);
-        });
-    }
-
-    function setParamsToMetric(scope, metricIndex) {
-      scope.vis.params.metricParams[metricIndex].mapType = scope.vis.params.mapType;
-      // _.set(scope.vis.params.metricParams[metricIndex], 'mapType', _.get(scope.vis.params, 'mapType'));
-    }
-
-    function setMetricToParams(scope, metricIndex) {
-      scope.vis.params.mapType = scope.vis.params.metricParams[metricIndex].mapType;
-      // _.set(scope.vis.params, 'mapType', _.get(scope.vis.params.metricParams[metricIndex], 'mapType'));
-    }
-    // lbmui: test to watch when aggs change
-    $scope.$watch('vis.aggs.bySchemaGroup.metrics', function (metrics) {
-      var metricsList = [], i;
-      var $optionScope = angular.element(document.getElementsByClassName('visualization-options')[0]).scope();
-
-      for (i = 0; i < metrics.length; i++) {
-        metricsList.push({
-          index: i,
-          name: metrics[i].makeLabel()
-        });
-        // check if not exit: push new metricParams at Index i
-        // Must change on $optionScope
-        if($optionScope && $optionScope.vis.params.metricParams.length <= i) {
-          $optionScope.vis.params.metricParams[i] = {};
-          setParamsToMetric($optionScope, i);
-        }
-        // may be no need
-        if($scope.vis.params.metricParams.length <= i) {
-          $scope.vis.params.metricParams[i] = {};
-          setParamsToMetric($scope, i);
-        }
-
-      }
-
-      $scope.vis.type.params.metrics = metricsList;
-    });
 
     $scope.$watch('esResponse', function (resp) {
       if(resp) {
@@ -178,16 +105,8 @@ define(function (require) {
           courier.fetch();
           return;
         }
-        console.log('test response', resp);
         const chartData = buildChartData(resp);
-        //lbmui
-
-        // console.log('group metrics', $scope.vis.aggs.bySchemaGroup.metrics);
-        // console.log('group metrics label', $scope.vis.aggs.bySchemaGroup.metrics[0].makeLabel());
-        // console.log('group metrics key', $scope.vis.aggs.bySchemaGroup.metrics[0].getKey);
-        // console.log('name', $scope.vis.aggs.bySchemaName);
         if(!chartData) return;
-        console.log('test for grid', chartData.geoJson);
         const geoMinMax = getGeoExtents(chartData);
         chartData.geoJson.properties.allmin = geoMinMax.min;
         chartData.geoJson.properties.allmax = geoMinMax.max;
@@ -198,14 +117,10 @@ define(function (require) {
         if (_.get($scope.vis.params, 'overlay.wms.enabled')) {
           addWmsOverlays();
         }
-        // lbmui: add wind overlay
-        if (_.get($scope.vis.params, 'overlay.wind.enabled')) {
-          addWindOverlays();
-        }
         map.addMarkers(
           chartData,
           $scope.vis.params,
-          Private(require('plugins/tnf_tilemap/geo_json/tnf_tooltip_formatter')),
+          Private(require('ui/agg_response/geo_json/_tooltip_formatter')),
           _.get(chartData, 'valueFormatter', _.identity),
           collar);
       }
@@ -216,15 +131,6 @@ define(function (require) {
       resizeChecker.destroy();
       if (map) map.destroy();
     });
-
-    $scope.myFunction = function(e) {
-      $(e.target).parent().toggleClass('open');
-    }
-
-    $scope.changeMetricsIndex = function (index) {
-      setMetricToParams($scope, index);
-      courier.fetch();
-    }
 
     function getGeoFilters(field) {
       let filters = [];
@@ -279,14 +185,6 @@ define(function (require) {
       }
     }
 
-    // lbmui: addWindOverlays function
-    function addWindOverlays() {
-      const url = _.get($scope.vis.params, 'overlay.wind.url');
-      const name = _.get($scope.vis.params, 'overlay.wind.displayName', 'Wind');
-
-      map.addWindOverlay(url, name);
-
-    }
     function appendMap() {
       callbacks.setPushFilter(pushFilter);
       const initialMapState = utils.getMapStateFromVis($scope.vis);

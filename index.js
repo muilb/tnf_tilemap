@@ -1,6 +1,5 @@
-/**
- * Created by lebamui on 11/11/2016.
- */
+'use strict';
+
 module.exports = function (kibana) {
 
   return new kibana.Plugin({
